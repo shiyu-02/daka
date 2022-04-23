@@ -1,0 +1,91 @@
+name: 'GitHub Actions LZU Auto COVID Health Report'
+concurrency: report-${{ github.ref }}
+
+on:
+  workflow_dispatch:  # Allow manual triggers
+    inputs:
+      delays:
+        description: 'Delayed time (Optional) 可选延迟时间'
+        required: false
+  schedule:
+    - cron: '0 23 * 1,2,7,8 *' # Schedule on CST 7 everyday during Jan. Feb. Jul. Aug.
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    steps:
+        - name: 'Checkout codes'
+          uses: actions/checkout@main
+        - name: 'Set up Python'
+          uses: actions/setup-python@main
+          with:
+            python-version: '3.x'
+        - uses: actions/cache@v2
+          with:
+            path: ~/.cache/pip
+            key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-run.txt') }}
+            restore-keys: |
+              ${{ runner.os }}-pip-
+        - name: 'Install requirements'
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements-run.txt
+        - name: Star original repository if GPATOKEN set
+          run: |
+            curl \
+            -X PUT \
+            -H 'authorization: token ${{ secrets.GPATOKEN }}' \
+            -H "Accept: application/vnd.github.v3+json" \
+            $GITHUB_API_URL/user/starred/HollowMan6/LZU-Auto-COVID-Health-Report
+        - name: Time wait ${{ github.event.inputs.delays }}
+          if: ${{ github.event.inputs.delays != '' }}
+          run: sleep ${{ github.event.inputs.delays }}
+        - name: 'Auto COVID Health Report'
+          env:
+            CARDID: ${{ secrets.CARDID }}
+            PASSWORD: ${{ secrets.PASSWORD }}
+            TZ: Asia/Shanghai
+          run: |
+            if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -z "${{ github.event.inputs.delays }}" ]; then 
+            python LZU-Auto-COVID-Health-Report.py >> information.txt && cat information.txt; else
+            python LZU-Auto-COVID-Health-Report.py delayrand >> information.txt && cat information.txt; fi;
+        - name: 'Error logging and Notifying'
+          env:
+            SERVERCHANSCKEY: ${{ secrets.SERVERCHANSCKEY }}
+            PPTOKEN: ${{ secrets.PPTOKEN }}
+            PPTOPIC: ${{ secrets.PPTOPIC }}
+            TGBOTTOKEN: ${{ secrets.TGBOTTOKEN }}
+            TGCHATID: ${{ secrets.TGCHATID }}
+            SUBSINFO: ${{ secrets.SUBSINFO }}
+            CORPID: ${{ secrets.CORPID }}
+            CORPSECRET: ${{ secrets.CORPSECRET }}
+            AGENTID: ${{ secrets.AGENTID }}
+          if: ${{ failure() }}
+          run: |
+            job_url=`curl $GITHUB_API_URL/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs | grep html_url | cut -d \" -f 4` \
+            && python Notify-Result.py failure ${job_url}?check_suite_focus=true && cat information.txt
+        - name: 'Notify Success'
+          env:
+            SERVERCHANSCKEY: ${{ secrets.SERVERCHANSCKEY }}
+            PPTOKEN: ${{ secrets.PPTOKEN }}
+            PPTOPIC: ${{ secrets.PPTOPIC }}
+            TGBOTTOKEN: ${{ secrets.TGBOTTOKEN }}
+            TGCHATID: ${{ secrets.TGCHATID }}
+            SUBSINFO: ${{ secrets.SUBSINFO }}
+            CORPID: ${{ secrets.CORPID }}
+            CORPSECRET: ${{ secrets.CORPSECRET }}
+            AGENTID: ${{ secrets.AGENTID }}
+          if: ${{ success() }}
+          run: |
+            job_url=`curl $GITHUB_API_URL/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs | grep html_url | cut -d \" -f 4` \
+            && python Notify-Result.py success ${job_url}?check_suite_focus=true
+        - name: 'Re-run workflow if failed and GPATOKEN set'
+          if: ${{ failure() }}
+          run: |
+            workflow_url=`curl $GITHUB_API_URL/repos/${{ github.repository }}/actions/runs/${{ github.run_id }} | grep workflow_url | cut -d \" -f 4` \
+            && curl \
+            -X POST \
+            -H 'authorization: token ${{ secrets.GPATOKEN }}' \
+            -H "Accept: application/vnd.github.v3+json" \
+            $workflow_url/dispatches \
+            -d '{"ref":"${{ github.ref }}", "inputs": { "delays": "30m" }}'
