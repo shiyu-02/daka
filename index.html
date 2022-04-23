@@ -1,0 +1,1979 @@
+<!--
+  LZU Auto COVID Health Report Using GitHub Actions Management Front-end
+
+  Copyright © 2021 Hollow Man(@HollowMan6). All rights reserved.
+
+  This document is free software; you can redistribute it and/or modify it under the terms of the GNU General
+  Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option)
+  any later version.
+-->
+
+<!doctype html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport"
+        content="width=device-width,initial-scale=0.6,maximum-scale=1.5,minimum-scale=0.6,user-scalable=yes">
+    <meta name="keywords" content="Hollow Man, 蒋嵩林, 兰州大学, 兰大, 疫情, 定时, 健康打卡, 自动" />
+    <meta name="description"
+        content="兰大疫情期间自动定时健康打卡管理前端。LZU Auto COVID Health Report Using GitHub Actions Management Front-end." />
+    <meta name="robots" content="all" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta name="Author" content="Hollow Man" />
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#EEEEEE" />
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./lzu.png">
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark/dist/css/bootstrap-dark.min.css"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap.min.css"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap-dark.min.css"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@forevolve/bootstrap-dark/dist/css/toggle-bootstrap-print.min.css"
+        rel="stylesheet">
+    <link rel="icon" href="./lzu.png" type="image/png">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sweetalert2"></script>
+    <link id="theme-swal" href="" rel="stylesheet">
+    <link href="/css/dayNightSwitchButton.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/js-base64/base64.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/sodium-plus/dist/sodium-plus.min.js"></script>
+    <title>兰大疫情期间自动定时健康打卡</title>
+    <style>
+        * {
+            cursor: url('/img/cursor/normal.cur'), default;
+            transition: all .3s;
+        }
+
+        body,
+        html {
+            max-width: 880px;
+            margin: 0 auto;
+        }
+
+        .list-group-item a {
+            margin-right: 20px;
+        }
+
+        .card-body {
+            color: #6C757D;
+        }
+
+        .card-body>.btn {
+            margin-top: .25rem;
+            margin-bottom: .25rem;
+        }
+
+        .swal2-backdrop-show {
+            backdrop-filter: blur(2px);
+        }
+
+        .swal2-styled {
+            margin: .3125em !important;
+        }
+
+        .swal2-checkbox,
+        .swal2-file,
+        .swal2-input,
+        .swal2-radio,
+        .swal2-select,
+        .swal2-textarea {
+            margin: 1em auto !important;
+        }
+
+        a,
+        button,
+        input,
+        .swal2-styled {
+            cursor: url('/img/cursor/link.cur'), pointer !important;
+        }
+
+        a {
+            text-decoration: none;
+            -webkit-transition: all .8s;
+            transition: all .8s;
+            position: relative;
+        }
+
+        a::after {
+            content: "";
+            width: 0;
+            height: 4px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 4'%3E%3Cpath fill='none' stroke='%23059DDB' stroke-width='2' d='M0 3.5c5 0 5-3 10-3s5 3 10 3 5-3 10-3 5 3 10 3'/%3E%3C/svg%3E") repeat-x 0 100%;
+            background-size: 20px auto;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transition: all .8s;
+        }
+
+        a:hover,
+        a:focus {
+            text-shadow: 0em 0.2em 0.2em rgba(0, 0, 0, 0.25);
+            text-decoration: none !important;
+        }
+
+        a:hover::after,
+        a:focus::after {
+            left: 0%;
+            width: 100%;
+            animation: waveMove 1s infinite linear;
+        }
+
+        .footerLogo {
+            animation: rotate 3s infinite linear;
+        }
+
+        .headpic {
+            opacity: 0.7;
+            filter: alpha(opacity=70);
+            -webkit-transition: opacity 1s, filter 1s, transform 2s;
+            transition: opacity 1s, filter 1s, transform 2s;
+        }
+
+        .headpic:hover {
+            opacity: 1;
+            filter: alpha(opacity=100);
+            transform: rotateX(360deg);
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes waveMove {
+            from {
+                background-position: 0 100%;
+            }
+
+            to {
+                background-position: -20px 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bootstrap">
+    <div class="toggle toggle--daynight" id="SwitchNightMode">
+        <input type="checkbox" id="toggle--daynight1" class="toggle--checkbox" onclick="toggleTheme();">
+        <label class="toggle--btn" for="toggle--daynight1"><span class="toggle--feature"></span></label>
+    </div>
+    <script>
+        function register(config) {
+            if ("serviceWorker" in navigator) {
+                var swUrl = config.path + "/" + config.name + "?v=" + config.ver;
+                navigator.serviceWorker
+                    .register(swUrl)
+                    .then(function (registration) {
+                        if (config && config.onRegster) {
+                            config.onRegster(registration);
+                        }
+                        registration.onupdatefound = function (e) {
+                            var installingWorker =
+                                e.target.installing ||
+                                e.target.waiting ||
+                                e.target.active;
+                            if (installingWorker == null) {
+                                return;
+                            }
+                            installingWorker.addEventListener("statechange", e => {
+                                if (installingWorker.state === "installed") {
+                                    if (navigator.serviceWorker.controller) {
+                                        if (config && config.onUpdate) {
+                                            config.onUpdate(registration);
+                                        }
+                                    } else {
+                                        if (config && config.onSuccess) {
+                                            config.onSuccess(registration);
+                                        }
+                                    }
+                                }
+                            });
+                        };
+                    })
+                    .catch(function (error) {
+                        console.error("serviceWorker Error When Register:", error);
+                    });
+            }
+        }
+
+        register({
+            ver: 1,
+            path: "",
+            name: "sw.js"
+        });
+
+        function createNotify(title, options) {
+            options.requireInteraction = true;
+            options.vibrate = [200, 100, 200];
+            options.icon = "./lzu.png";
+
+            if (!window.Notification || !Notification.requestPermission) {
+                return false;
+            } else if (Notification.permission === "granted") {
+                notify(title, options);
+            } else {
+                Notification.requestPermission(function (res) {
+                    if (res === "granted") {
+                        notify(title, options);
+                    }
+                });
+            }
+
+            function notify($title, $options) {
+                try {
+                    var notification = new Notification($title, $options);
+                    notification.onclick = function (event) {
+                        if (event.target.data) {
+                            window.open(event.target.data);
+                        }
+                        window.focus();
+                    };
+                } catch (e) {
+                    if (e.name == 'TypeError' && "serviceWorker" in navigator) {
+                        navigator.serviceWorker.ready.then(async function (registration) {
+                            await registration.pushManager.getSubscription()
+                                .then(function (subscription) {
+                                    if (!subscription) {
+                                        registration.pushManager.subscribe({
+                                            userVisibleOnly: true
+                                        }).catch(function (err) {
+                                            console.log(
+                                                'Failed to subscribe notification to the user: ',
+                                                err);
+                                        });
+                                    }
+                                });
+                            registration.showNotification($title, $options);
+                        });
+                    }
+                }
+            }
+        }
+
+        function toggleTheme() {
+            var theme = document.getElementsByTagName("body")[0];
+            if (theme.classList.contains("bootstrap")) {
+                sessionStorage.setItem("night", true);
+                theme.classList.replace("bootstrap", "bootstrap-dark");
+                document.getElementById("toggle--daynight1").checked = true;
+                document.getElementById("theme-swal").href =
+                    "https://cdn.jsdelivr.net/npm/@sweetalert2/themes/dark/dark.min.css";
+                document.querySelector("meta[name=color-scheme]").setAttribute('content', 'dark');
+            } else {
+                sessionStorage.setItem("night", false);
+                theme.classList.replace("bootstrap-dark", "bootstrap");
+                document.getElementById("toggle--daynight1").checked = false;
+                document.getElementById("theme-swal").href = "";
+                document.querySelector("meta[name=color-scheme]").setAttribute('content', 'light');
+            }
+        }
+
+        var prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+        if (sessionStorage.getItem("night") === "true") {
+            toggleTheme();
+        } else if (prefersDarkScheme.matches && !sessionStorage.getItem("night")) {
+            toggleTheme();
+        }
+
+        var authPage =
+            "https://github.com/login/oauth/authorize?client_id=7cf942f429914c231c8f&scope=public_repo,workflow,delete_repo";
+        var accessToken = "";
+        var toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+        });
+
+        function getUrlParam(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return "";
+        }
+
+        function authFailed(error, error_description = "", error_uri = "") {
+            var footerMSG = "";
+            var errExplainURL = error_uri;
+            if (errExplainURL) {
+                footerMSG = '<a target="_blank" onclick="notifyNotif(\'错误解释\');" href="' + errExplainURL +
+                    '">错误详细解释及解决办法</a>';
+            }
+            Swal.fire({
+                icon: 'error',
+                allowOutsideClick: false,
+                title: 'GitHub授权认证失败',
+                text: error + '! ' + error_description.replace(/\+/g, " "),
+                footer: footerMSG,
+                confirmButtonText: `重试`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location = authPage;
+                }
+            });
+        }
+
+        function networkErr(error, func) {
+            Swal.fire({
+                icon: 'error',
+                allowOutsideClick: false,
+                title: '网络链接错误',
+                text: error,
+                confirmButtonText: `重试`,
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return async function () {
+                        if (typeof func === "function") {
+                            var AsyncFunction = (async () => {}).constructor;
+                            if (func instanceof AsyncFunction === true) {
+                                await func();
+                            } else {
+                                func();
+                            }
+                        } else {
+                            window.location = window.location.protocol + "//" + window.location
+                                .hostname + window.location.pathname;
+                        }
+                    }();
+                }
+            })
+        }
+
+        if (getUrlParam("error")) {
+            authFailed(getUrlParam("error"), getUrlParam("error_description"), getUrlParam("error_uri"));
+        } else if (getUrlParam("code")) {
+            var codeAPI = 'https://lzu-covid-github-app.herokuapp.com/authenticate/' + getUrlParam("code");
+            Swal.fire({
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                title: '获取登录授权信息中...',
+                text: '开发不易，信息获取成功后会自动为源项目加星★Star收藏，如果不同意请自行取消',
+                didOpen: () => {
+                    return fetch(codeAPI)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.error) {
+                                authFailed(data.error)
+                            } else {
+                                accessToken = data.token;
+                                main(accessToken);
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '无法获取Access Token',
+                                text: '请确认网络链接是否正常，正常的话联系hollowman@hollowman.ml确认/维护反向代理应用部署状态!',
+                                confirmButtonText: `重试`
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location = authPage;
+                                }
+                            });
+                        })
+                },
+            });
+        } else {
+            Swal.fire({
+                icon: 'info',
+                timer: 5000,
+                timerProgressBar: true,
+                title: '五秒后自动进行GitHub登录授权认证...点击背景可即刻认证',
+                text: '如果你是第一次使用，在跳转页面处完成授权操作后会自动跳转回来',
+                confirmButtonText: '我要浏览一下页面，先不要登录GitHub。',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    toast.fire({
+                        icon: 'info',
+                        title: '稍后你可以通过刷新本页面来进行登录',
+                    });
+                    var inputs = document.querySelectorAll("#setActionsSecret > input");
+                    for (var i = 0; i < inputs.length; i++) {
+                        inputs[i].disabled = true;
+                    }
+                    var buttons = document.querySelectorAll("#forkRepoAction > button");
+                    for (var i = 0; i < buttons.length; i++) {
+                        buttons[i].disabled = true;
+                    }
+                    document.getElementById("buildRepo").disabled = true;
+                    document.getElementById("password").disabled = true;
+                    document.getElementById("showHidePassword").disabled = true;
+                    document.getElementById("repository").style.display = "";
+                } else {
+                    window.location = authPage;
+                }
+            });
+        }
+
+        function togglePasswordShow() {
+            if (document.getElementById("password").type === "password") {
+                document.getElementById("password").type = "text";
+                document.getElementById("showHidePassword").children[0].classList.replace("fa-eye", "fa-eye-slash");
+            } else {
+                document.getElementById("password").type = "password";
+                document.getElementById("showHidePassword").children[0].classList.replace("fa-eye-slash", "fa-eye");
+            }
+        }
+    </script>
+    <blockquote class="blockquote text-center">
+        <p class="mb-0"><img src="./lzu.png" height="20rem"
+                style="margin-top: -0.2rem" />兰州大学疫情期间自动定时健康打卡</p>
+        <footer class="blockquote-footer">LZU Auto COVID Health Report <cite title="Source Title">Using GitHub
+                Actions</cite></footer>
+    </blockquote>
+    <hr />
+    <h3 id="welcome" class="text-center"><a onclick="window.location.reload();"><i class="fa fa-sign-in"
+                aria-hidden="true"></i> 尚未登录</a></h3>
+    <div class="alert alert-success" role="alert">
+        <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 简介: </strong></i><br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;填写完 <i class="fa fa-wpforms" aria-hidden="true"></i>
+        表单相关信息并且 <i class="fa fa-check" aria-hidden="true"></i> 提交后，本网页软件会将<a target="_blank"
+            onclick="notifyNotif('源仓库');" class="text-success"
+            href="https://github.com/HollowMan6/LZU-Auto-COVID-Health-Report">源仓库</a>自动 <i class="fa fa-code-fork"
+            aria-hidden="true"></i>
+        Fork到你的 <i class="fa fa-github" aria-hidden="true"></i> GitHub账户下并自动配置相关打卡信息到你的
+        <i class="fa fa-github" aria-hidden="true"></i> GitHub的 <i class="fa fa-code-fork" aria-hidden="true"></i>
+        Fork仓库工作流运行环境中( <i class="fa fa-user-secret" aria-hidden="true"></i> Actions
+        Secrets)，通过预定义在工作流中的定时任务和 <i class="fa fa-github" aria-hidden="true"></i> GitHub Actions
+        实现全自动打卡，同时支持打卡结果推送到 <i class="fa fa-weixin" aria-hidden="true"></i>
+        微信、<i class="fa fa-telegram" aria-hidden="true"></i> Telegram等社交软件，以及浏览器订阅打卡消息 <i class="fa fa-bullhorn"
+            aria-hidden="true"></i>
+        通知(即使网页已经关闭，你仍然可以收到 <i class="fa fa-bullhorn" aria-hidden="true"></i> 通知信息)。本网页软件通过
+        <i class="fa fa-github" aria-hidden="true"></i> GitHub OAuth以及相关API实现，不会记录你的任何信息，打卡工作流托管于你的
+        <i class="fa fa-github" aria-hidden="true"></i> GitHub 的对应 <i class="fa fa-code-fork" aria-hidden="true"></i>
+        Fork仓库中，实现了 <i class="fa fa-user-secret" aria-hidden="true"></i>
+        隐私保护，请放心使用。如果检测到已经 <i class="fa fa-code-fork" aria-hidden="true"></i>
+        Fork过本仓库，软件还提供了一系列 <i class="fa fa-cog fa-spin" aria-hidden="true"></i> 管理以及自定义功能操作。<br />
+        <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 说明: </strong></i>
+        <br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;强烈建议你自己在官方平台打一次卡之后再使用本软件，从而初始化平台打卡系统中的数据。本软件将会一直沿用你在兰州大学个人工作台打卡系统中最新填报的<strong>是否在校</strong>、
+        <strong>所在省市区</strong>、 <strong>是否出国</strong>、
+        <strong>出国地点</strong>打卡信息，并会一直上报最健康的状态。如你的信息发生变化，请及时登录官方打卡界面进行信息更新。<br />
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;如果有任何问题，欢迎通过<a target="_blank"
+            onclick="notifyNotif('源仓库Issue');" class="text-success"
+            href="https://github.com/HollowMan6/LZU-Auto-COVID-Health-Report/issues">Issue</a>进行反馈；你也可以通过 <i
+            class="fa fa-envelope-o" aria-hidden="true"></i> 邮箱<a class="text-success"
+            onclick="notifyNotif('写邮件给作者邮箱');" target="_blank"
+            href="mailto:hollowman@hollowman.ml">hollowman@hollowman.ml</a>联系我。<br />
+        <i><strong><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 注意: </strong></i><br />1. 请不要使用 <span
+            class="fa-stack fa-lg"><i class="fa fa-internet-explorer fa-stack-1x"></i><i
+                class="fa fa-ban fa-stack-2x text-danger"></i></span> IE 浏览本页面!
+        推荐使用最新版 <i class="fa fa-chrome" aria-hidden="true"></i> 谷歌Chrome、<i class="fa fa-edge" aria-hidden="true"></i>
+        微软Edge或者 <i class="fa fa-firefox" aria-hidden="true"></i> Mozilla Firefox。<br />2. 支持PWA应用方式使用，
+        你可以点击地址栏右侧的<strong>+</strong>号或者其它安装图标，或者打开浏览器菜单，点击添加网页到桌面
+        (各浏览器各版本之间可能有不同，根据你使用的浏览器决定) 进行安装，之后就可以点击桌面图标使用本网页应用。
+        <br />3. 因为 <i class="fa fa-github"
+            aria-hidden="true"></i> GitHub
+        API的限制，请不要频繁尝试提交该网页表单!<br />4. <i class="fa fa-user-secret" aria-hidden="true"></i>
+        Secrets提交并离开本页面后将无法再查看相关内容!<br />
+        5. 再次提交表单将会覆盖上次填写的所有 <i class="fa fa-user-secret" aria-hidden="true"></i> Secrets!<br />6. 默认自动打卡 <i
+            class="fa fa-clock-o" aria-hidden="true"></i> 时间为北京时间1,2,7,8月每天早7点(因
+        <i class="fa fa-github" aria-hidden="true"></i> GitHub 方原因，可能会有半小时左右的延迟)<br />
+        7. <i class="fa fa-android" aria-hidden="true"></i>
+        安卓端 <i class="fa fa-chrome" aria-hidden="true"></i> Chrome、<i class="fa fa-edge" aria-hidden="true"></i> Edge、<i
+            class="fa fa-firefox" aria-hidden="true"></i> Firefox浏览器订阅和接收打卡消息时请确保设备访问 <i
+            class="fa fa-google-plus-official" aria-hidden="true"></i>
+        谷歌服务通畅。如点击<strong>启用浏览器订阅打卡消息</strong>后，按钮之后未变为<strong>关闭...</strong>，则除了网络问题，
+        请确保浏览器为谷歌Play商店下载的最新版，其它原因一般为你的ROM版本不支持FCM推送服务，建议安装谷歌框架或者刷国际版ROM之后再试。
+        华为/荣耀手机如果安装了谷歌框架后还不支持FCM推送服务可以参考<a target="_blank" onclick="notifyNotif('华为/荣耀安装FCM指南');" class="text-success"
+            href="https://github.com/HollowMan6/LZU-Auto-COVID-Health-Report/tree/main/docs/Huawei_Honor_FCM_Fix">这篇文章</a>。
+    </div>
+    <div id="repository" class="card" style="display: none;">
+        <h5 class="card-header"><i class="fa fa-cogs" aria-hidden="true"></i> Fork仓库操作</h5>
+        <div class="card-body" id="forkRepoAction" align="center">
+            <button type="button" class="btn btn-outline-secondary" id="NotifPushBtn"><i class="fa fa-bullhorn"
+                    aria-hidden="true"></i> 启用浏览器订阅打卡消息</button>
+            <br />
+            <button type="button" class="btn btn-outline-primary" id="forkRepoAddr" onclick=""><i
+                    class="fa fa-code-fork" aria-hidden="true"></i> 查看你的Fork仓库</button>
+            <button type="button" class="btn btn-outline-primary" id="workflowAddr" onclick=""><i class="fa fa-eye"
+                    aria-hidden="true"></i> 查看你的自动打卡工作流运行历史记录</button>
+            <button type="button" class="btn btn-outline-secondary" id="workflowDispatch"
+                onclick="workflowDispatch();"><i class="fa fa-wrench" aria-hidden="true"></i> 手动打卡一次</button>
+            <br />
+            <button type="button" class="btn btn-outline-warning" id="cronJobAddr" onclick="guideToEditCronJob();"><i
+                    class="fa fa-calendar" aria-hidden="true"></i> 修改每日打卡时间</button>
+            <button type="button" class="btn btn-outline-warning" id="delaysAddr" onclick="guideToEditDelays();"><i
+                    class="fa fa-history" aria-hidden="true"></i> 修改打卡失败延迟</button>
+            <button type="button" class="btn btn-outline-danger" id="workflowSwitch" onclick="activateWorkflow();"><i
+                    class='fa fa-check' aria-hidden='true'></i> 启用Workflow自动打卡</button>
+            <button type="button" class="btn btn-outline-danger" onclick="deleteFork();"><i class="fa fa-trash"
+                    aria-hidden="true"></i> 删除你的Fork仓库</button>
+        </div>
+    </div>
+    <div class="card">
+        <h5 class="card-header"><i class="fa fa-cog fa-spin" aria-hidden="true"></i> Fork仓库工作流运行环境配置( <i
+                class="fa fa-user-secret" aria-hidden="true"></i>
+            Actions Secrets)
+        </h5>
+        <div class="card-body">
+            <div id="setActionsSecret" class="form-group">
+                <div class="alert alert-danger" role="alert">
+                    <i class="fa fa-check" aria-hidden="true"></i> 必填项，登录<a target="_blank"
+                        onclick="notifyNotif('兰大个人工作台');" class="text-danger"
+                        href="http://my.lzu.edu.cn:8080/login?service=http://my.lzu.edu.cn">兰州大学个人工作台</a>必备!
+                </div>
+                <label for="input"><i class="fa fa-id-card" aria-hidden="true"></i> 学号：</label>
+                <input type="text" class="form-control" id="cardid" placeholder="兰大校园卡号(也可不含@lzu.edu.cn的邮箱名)">
+                <br />
+                <label for="input"><i class="fa fa-key" aria-hidden="true"></i> 密码：</label>
+                <div class="input-group">
+                    <input type="password" class="form-control" id="password" placeholder="兰大邮箱密码">
+                    <div class="input-group-addon">
+                        <button class="btn btn-outline-secondary" style="height: 100%" id="showHidePassword"
+                            onclick="togglePasswordShow();"><i class="fa fa-eye" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+                <br />
+                <label for="input"><i class="fa fa-clock-o" aria-hidden="true"></i> 启用打卡失败后再次自动打卡：</label>
+                <input type="checkbox" id="delaysEnable" checked="true">
+                <div class="alert alert-primary" role="alert">
+                    <i class="fa fa-check-square-o" aria-hidden="true"></i> 选填项，用来配置<i class="fa fa-paper-plane-o"
+                        aria-hidden="true"></i> 打卡结果推送，四选一即可。
+                </div>
+                <h5>
+                    <a href="https://www.pushplus.plus/push1.html" onclick="notifyNotif('Pushplus官网');" target="_blank"><i
+                            class="fa fa-wechat" aria-hidden="true"></i> PushPlus(推荐渠道)</a>:
+                </h5>
+                <div class="alert alert-secondary" role="alert">
+                    <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 使用PushPlus配置微信推送方法:
+                        </strong></i><br />
+                    点开上面链接，用微信登陆并关注公众号后，根据需要复制下图红框所指信息到表单中。
+                    <img src="img/c1.png" width="85%" />
+                </div>
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> PPTOKEN：</label>
+                <input type="text" class="form-control" id="pptoken" placeholder="PushPlus Token(选用PushPlus推送必填)">
+                <br />
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> PPTOPIC：</label>
+                <input type="text" class="form-control" id="pptopic" placeholder="PushPlus Topic 群组编码(仅一对多推送需要)">
+                <br />
+                <h5>
+                    <a target="_blank"
+                    onclick="notifyNotif('企业微信推送内容示例');"
+                    href="https://open.work.weixin.qq.com/wwopen/mpnews?mixuin=pHhNDQAABwCobsHiAAAUAA&mfid=WW0324-8tTQjQAABwBCZs6oZBo1yA3mwAO57&idx=0&sn=4f42d0909560e8b42dd756d0ac1b04b6"><i class="fa fa-wechat" aria-hidden="true"></i> 企业微信推送:</a>
+                </h5>
+                <div class="alert alert-secondary" role="alert">
+                    <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 配置企业微信推送方法:
+                        </strong></i><br />
+                    1. 首先注册<a href="https://work.weixin.qq.com/wework_admin/loginpage_wx" class="text-secondary"
+                        onclick="notifyNotif('企业微信管理页面');"
+                        target="_blank">企业微信</a>。<br />
+                    2. 注册成功后，获取企业id，填入下方<strong>CORPID</strong>。<br />
+                    <img src="img/wecomid.png"
+                        width="50%" /><br />
+                    3. 选择<strong>应用管理</strong> → <strong>应用</strong> → <strong>创建应用</strong>。<br />
+                    <img src="img/wecom_create_apps.png"
+                        width="50%" /><br />
+                    4. 自己创建完成后获取<strong>AgentId</strong>和<strong>Secret</strong>，分别填入下方<strong>CORPSECRET</strong>和<strong>AGENTID</strong>。
+                    <img src="img/wecom_apps.png"
+                        width="50%" /><br />
+                    5. 进入<strong>我的企业</strong> → <strong>微信插件</strong>，拉到下边扫描二维码，关注以后即可收到推送的消息。<br />
+                    <img src="img/wecom_wechat.png"
+                        width="50%" /><br />
+                </div>
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> CORPID：</label>
+                <input type="text" class="form-control" id="corpid"
+                    placeholder="企业ID(选用企业微信推送必填)">
+                <br />
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> AGENTID：</label>
+                <input type="text" class="form-control" id="agentid"
+                    placeholder="推送应用AgentId(选用企业微信推送必填)">
+                <br />
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> CORPSECRET：</label>
+                <input type="text" class="form-control" id="corpsecret"
+                    placeholder="推送应用Secret(选用企业微信推送必填)">
+                <br />
+                <h5>
+                    <a href="https://sct.ftqq.com/" onclick="notifyNotif('Server酱官网');" target="_blank"><i class="fa fa-commenting" aria-hidden="true"></i> Server酱:</a>
+                </h5>
+                <div class="alert alert-secondary" role="alert">
+                    <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 使用Server酱系列配置微信/钉钉/飞书/APP等推送方法:
+                        </strong></i><br />
+                    请点开上面链接，参考其网站相关教程说明，然后按照下面相关表单提示复制相关信息并粘贴到相应表单中。
+                </div>
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> SERVERCHANSCKEY：</label>
+                <input type="text" class="form-control" id="serverchansckey"
+                    placeholder="Server酱 SendKey(选用Server酱系列推送必填)">
+                <br />
+                <h5>
+                    <i class="fa fa-telegram" aria-hidden="true"></i> Telegram Bot:
+                </h5>
+                <div class="alert alert-secondary" role="alert">
+                    <i><strong><i class="fa fa-info-circle" aria-hidden="true"></i> 使用Telegram Bot配置Telegram推送方法:
+                        </strong></i><br />
+                    1. 在Telegram中添加<a href="https://t.me/botfather" class="text-secondary"
+                        onclick="notifyNotif('BotFather Telegram账号');"
+                        target="_blank">BotFather</a>这个账号，然后向其依次发送<strong>/start</strong>,
+                    <strong>/newbot</strong>，按照提示设定机器人名字后，即可创建一个属于你自己的全新的机器人。记下该机器人的token并填写到下方<i>TGBOTTOKEN</i>处。(内容类似于<strong>110201543:AAHdqTcvCH1vGWJxfSeofSAs0K5PALDsaw</strong>)<br />
+                    <img src="img/Telegram.jpg"
+                        width="50%" /><br />
+                    2. 搜索你刚刚创建的机器人的名字，并给它发送<strong>/start</strong>或者任意一条消息。<br />
+                    <i><strong><i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                            特别注意：需要先与机器人之间创建会话，机器人才能下发消息，否则机器人无法主动发送消息，切记!</strong></i><br />
+                    3. 在Telegram中搜索<a href="https://t.me/userinfobot" class="text-secondary"
+                        onclick="notifyNotif('userinfobot Telegram账号');"
+                        target="_blank">userinfobot</a>这个账号，并给它发送<strong>/start</strong>或者任意一条消息，它会返回你的账号的id；将该id填写到下方<i>TGCHATID</i>处。<br />
+                    4.
+                    如果你还想将自己的打卡信息推送给其他账号，请在另外的账号上重复步骤2和3，并修改<i>TGCHATID</i>，多个ID间使用</strong>,</strong>半角逗号分隔即可。<br />
+                </div>
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> TGBOTTOKEN：</label>
+                <input type="text" class="form-control" id="tgbottoken"
+                    placeholder="Telegraph Bot Token(选用Telegram Bot推送必填)">
+                <br />
+                <label for="input"><i class="fa fa-user-secret" aria-hidden="true"></i> TGCHATID：</label>
+                <input type="text" class="form-control" id="tgchatid"
+                    placeholder="Telegram User ID(选用Telegram Bot推送必填)">
+                <br />
+            </div>
+            <div class="alert alert-danger" role="alert">
+                <i><strong><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> 免责声明: </strong></i><br />
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于每个人的打卡程序都托管在各自 <i class="fa fa-github"
+                    aria-hidden="true"></i> GitHub账户的
+                <i class="fa fa-code-fork" aria-hidden="true"></i>
+                Fork仓库中，使用 <i class="fa fa-github" aria-hidden="true"></i> GitHub
+                Actions进行自动打卡，并且本程序遵循GPL-3.0协议，你可以自由地修改你的 <i class="fa fa-code-fork" aria-hidden="true"></i>
+                Fork仓库中的程序，此外由于打卡程序的 <i class="fa fa-history" aria-hidden="true"></i>
+                时效性，所以 <i class="fa fa-user-o" aria-hidden="true"></i> 原作者不能永远确保你的打卡程序的正确性，也不能确保
+                <i class="fa fa-github" aria-hidden="true"></i> GitHub平台执行 <i class="fa fa-clock-o"
+                    aria-hidden="true"></i> 定时任务的稳定性，
+                即<strong>不能确保自动打卡程序始终能按照预期方式工作</strong>。因而<strong>根据打卡结果更新 <i class="fa fa-code-fork"
+                        aria-hidden="true"></i> Fork仓库、调整相关程序或打卡信息是用户的义务，
+                    因打卡程序不稳定或者失效而产生的一切后果与 <i class="fa fa-user-o" aria-hidden="true"></i> <a target="_blank"
+                        onclick="notifyNotif('原作者GitHub');" class="text-danger"
+                        href="https://github.com/HollowMan6">原作者</a>无关</strong>。<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;点击以下按钮即代表你<i
+                    class="fa fa-check" aria-hidden="true"></i> 接受该免责声明。
+            </div>
+            <p align="center"><button type="button" class="btn btn-primary" id="buildRepo" onclick="startBuild();"><i
+                        class="fa fa-check" aria-hidden="true"></i> 确认上述信息填写正确，开始构建相关仓库!</button></p>
+        </div>
+    </div>
+    <script>
+        var userid = "";
+        var hasForked = false;
+        var headers = new Headers();
+        var secretNameList = ["cardid", "password", "pptoken", "pptopic", "serverchansckey",
+         "corpid", "corpsecret", "agentid", "tgbottoken", "tgchatid", "gpatoken", "subsinfo"
+        ];
+        var secretValue = ["", "", "", "", "", "", "", "", "", "", "", ""];
+        var workflowActivated = false;
+        var repoPublicKey = "";
+        var repoKeyID = "";
+
+        var applicationServerPublicKey =
+            'BOHSZycLLiXBjp0djrpD6vbzVX4g7D1QcW4cb1UonDcDYu6ewOXJ4qcz-e3J3d2VpjHgm0tHnZRjoGTv7SRJl7M';
+        var pushButton = document.getElementById('NotifPushBtn');
+        var isSubscribed = false;
+        var swRegistration = null;
+
+        function urlB64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding)
+                .replace(/\-/g, '+')
+                .replace(/_/g, '/');
+
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function updatePushBtn() {
+            if (Notification.permission === 'denied') {
+                pushButton.innerHTML = '<i class="fa fa-times" aria-hidden="true"></i> 本网站消息权限被禁用';
+                pushButton.disabled = true;
+                updateSubscriptionOnServer(null);
+                return;
+            }
+
+            if (isSubscribed) {
+                pushButton.innerHTML = '<i class="fa fa-power-off" aria-hidden="true"></i> 关闭浏览器订阅打卡消息';
+            } else {
+                pushButton.innerHTML = '<i class="fa fa-bullhorn" aria-hidden="true"></i> 启用浏览器订阅打卡消息';
+            }
+
+            pushButton.disabled = false;
+        }
+
+        function subscribeUser() {
+            const applicationServerKey = urlB64ToUint8Array(applicationServerPublicKey);
+            swRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                })
+                .then(function (subscription) {
+                    updateSubscriptionOnServer(subscription);
+                    isSubscribed = true;
+                    updatePushBtn();
+                })
+                .catch(function (err) {
+                    console.log('订阅用户失败: ', err);
+                    updatePushBtn();
+                });
+        }
+
+
+        async function updateSubscriptionOnServer(subscription) {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/secrets/public-key', {
+                        headers: headers
+                    }).then(response => {
+                    return response.json();
+                })
+                .then(async data => {
+                    if (data.message) {
+                        authFailed(data.message, "", data.documentation_url);
+                    } else {
+                        repoPublicKey = data.key;
+                        repoKeyID = data.key_id;
+                        if (subscription) {
+                            secretValue[secretValue.length - 1] = JSON.stringify(subscription);
+                        } else {
+                            secretValue[secretValue.length - 1] = "";
+                        }
+                        await setRepoSecrets(secretValue.length - 1);
+                    }
+                }).catch(function (error) {
+                    networkErr(error, buildAllRepoSecrets);
+                });
+        }
+
+        function unsubscribeUser() {
+            swRegistration.pushManager.getSubscription()
+                .then(function (subscription) {
+                    if (subscription) {
+                        return subscription.unsubscribe();
+                    }
+                })
+                .catch(function (error) {
+                    console.log('取消订阅失败: ', error);
+                })
+                .then(function () {
+                    updateSubscriptionOnServer(null);
+                    isSubscribed = false;
+                    updatePushBtn();
+                });
+        }
+
+        function initializePushButton() {
+            pushButton.addEventListener('click', function () {
+                pushButton.disabled = true;
+                if (isSubscribed) {
+                    unsubscribeUser();
+                } else {
+                    subscribeUser();
+                }
+            });
+
+            swRegistration.pushManager.getSubscription()
+                .then(function (subscription) {
+                    isSubscribed = !(subscription === null);
+                    updateSubscriptionOnServer(subscription);
+                    updatePushBtn();
+                });
+        }
+
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.ready
+                .then(function (swReg) {
+                    swRegistration = swReg;
+                })
+                .catch(function (error) {
+                    console.error('Service Worker错误:', error);
+                });
+        } else {
+            pushButton.innerHTML = '<i class="fa fa-times" aria-hidden="true"></i> 不支持浏览器推送消息';
+            pushButton.disabled = true;
+        }
+
+        async function encryptString(clearText) {
+            if (!window.sodium) window.sodium = await SodiumPlus.auto();
+            let publicKey = await X25519PublicKey.from(repoPublicKey, 'base64');
+            let cipherText = await sodium.crypto_box_seal(clearText, publicKey);
+            return cipherText.toString('base64');
+        }
+
+        function buildAllRepoSecrets() {
+            fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/secrets/public-key', {
+                        headers: headers
+                    }).then(response => {
+                    return response.json();
+                })
+                .then(async data => {
+                    if (data.message) {
+                        authFailed(data.message, "", data.documentation_url);
+                    } else {
+                        repoPublicKey = data.key;
+                        repoKeyID = data.key_id;
+                        for (var i = 0; i < secretNameList.length; i++) {
+                            await setRepoSecrets(i);
+                        };
+                        await activateWorkflowCoreWithWorkflowDispatch();
+                    }
+                }).catch(function (error) {
+                    networkErr(error, buildAllRepoSecrets);
+                });
+        }
+
+        async function setRepoSecrets(index) {
+            var secret = "";
+            if (secretValue[index]) {
+                secret = await encryptString(secretValue[index]);
+            }
+            if (secret) {
+                fetch('https://api.github.com/repos/' + userid + '/LZU-Auto-COVID-Health-Report/actions/secrets/' +
+                        secretNameList[index], {
+                            method: "PUT",
+                            headers: headers,
+                            body: JSON.stringify({
+                                encrypted_value: secret,
+                                key_id: repoKeyID
+                            })
+                        }).then(response => {
+                        if (response.status === 204 || response.status === 201) {
+                            return null;
+                        } else {
+                            return response.json();
+                        }
+                    })
+                    .then(data => {
+                        if (data) {
+                            if (data.message) {
+                                authFailed(data.message, "", data.documentation_url);
+                            }
+                        }
+                    }).catch(function (error) {
+                        setRepoSecrets(index);
+                    });
+            } else {
+                fetch('https://api.github.com/repos/' + userid + '/LZU-Auto-COVID-Health-Report/actions/secrets/' +
+                        secretNameList[index], {
+                            method: "DELETE",
+                            headers: headers,
+                        }).then(response => {
+                        if (response.status === 204) {
+                            return null;
+                        } else {
+                            return response.json();
+                        }
+                    })
+                    .then(data => {
+                        if (data) {
+                            if (data.message) {
+                                authFailed(data.message, "", data.documentation_url);
+                            }
+                        }
+                    }).catch(function (error) {
+                        console.log(error);
+                        console.log(secretNameList[index] + "删除错误!")
+                    });
+            }
+        }
+
+        function deleteForkToRecreate() {
+            fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report', {
+                        method: "DELETE",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message) {
+                            authFailed(data.message, "", data.documentation_url);
+                        }
+                    } else {
+                        workflowActivated = false;
+                        hasForked = false;
+                        document.getElementById("repository").style.display = "none";
+                        Swal.fire({
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            title: "原Fork仓库删除成功",
+                            text: '重新Fork仓库中...',
+                            didOpen: () => {
+                                return window.setTimeout(forkRepository, 5000);
+                            }
+                        });
+                    }
+                }).catch(function (error) {
+                    networkErr(error, deleteForkToRecreate);
+                });
+        }
+
+        function main(accessToken) {
+            headers.append("Accept", "application/vnd.github.v3+json")
+            headers.append("Authorization", "bearer " + accessToken)
+            fetch('https://api.github.com/user', {
+                    headers: headers
+                }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message) {
+                        authFailed(data.message, "", data.documentation_url);
+                    } else {
+                        userid = data.login;
+                        document.getElementById("welcome").innerHTML = "<img width='5%' src='" + data.avatar_url +
+                            "'/><br/><i class='fa fa-user' aria-hidden='true'></i> 欢迎, <a target='_blank' onclick='notifyNotif(\"你的GitHub\");' href='" +
+                            data
+                            .html_url +
+                            "'>" + data
+                            .login + "</a>!";
+                        setupLinks();
+                        fetch('https://api.github.com/user/starred/HollowMan6/LZU-Auto-COVID-Health-Report', {
+                            method: "PUT",
+                            headers: headers,
+                        }).catch(function (error) {
+                            console.log(error);
+                        });
+                        checkIfForked();
+                    }
+                }).catch(function (error) {
+                    networkErr(error);
+                });
+        }
+
+        function setupLinks() {
+            document.getElementById("forkRepoAddr").onclick = function () {
+                window.open("https://github.com/" + userid + "/LZU-Auto-COVID-Health-Report", '',
+                    'width=900,height=680,top=80,scrollbars=yes');
+                createNotify("已打开页面", {
+                    body: "已经为你打开Fork仓库页面，点击本通知返回!"
+                });
+            };
+            document.getElementById("workflowAddr").onclick = function () {
+                window.open("https://github.com/" + userid +
+                    "/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22",
+                    '', 'width=900,height=680,top=80,scrollbars=yes')
+                createNotify("已打开页面", {
+                    body: "已经为你打开工作流运行历史页面，点击本通知返回!"
+                });
+            };
+        }
+
+        function notifyNotif(msg) {
+            createNotify("已打开页面", {
+                body: "已经为你打开" + msg + "页面，点击本通知返回!"
+            });
+        }
+
+        var workflowContent = "";
+        var originWorkflowSha = "";
+        var modifiedWorkflowContent = "";
+
+        // async function disableUnrelevantWorkflow() {
+        //     await fetch('https://api.github.com/repos/' + userid +
+        //         '/LZU-Auto-COVID-Health-Report/actions/workflows/docker-publish.yml/disable', {
+        //             method: "PUT",
+        //             headers: headers,
+        //         }).catch(function (error) {
+        //         console.log(error);
+        //     });
+        //     await fetch('https://api.github.com/repos/' + userid +
+        //         '/LZU-Auto-COVID-Health-Report/actions/workflows/repo-sync.yml/disable', {
+        //             method: "PUT",
+        //             headers: headers,
+        //         }).catch(function (error) {
+        //         console.log(error);
+        //     });
+        // }
+
+        function guideToEditCronJob() {
+            if (workflowActivated) {
+                guideToEditCronJobCore();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '尚未启用工作流打卡，确定要启用Workflow自动打卡吗?',
+                    allowOutsideClick: false,
+                    showCancelButton: true,
+                    confirmButtonText: '我确认!',
+                    cancelButtonText: '不要了。',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return activateWorkflowToEditCronJob();
+                    }
+                });
+            }
+        }
+
+        async function activateWorkflowToEditCronJob() {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/enable', {
+                        method: "PUT",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else if (response.status === 500) {
+                        return {
+                            message: "Not Found"
+                        };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '尚未启用Fork仓库的Actions',
+                                text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                    userid +
+                                    '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                confirmButtonText: `重试`,
+                                showCancelButton: true,
+                                cancelButtonText: "取消",
+                                showLoaderOnConfirm: true,
+                                preConfirm: () => {
+                                    return activateWorkflowToEditCronJob();
+                                }
+                            })
+                        }
+                    } else {
+                        workflowActivated = true;
+                        document.getElementById("workflowSwitch").innerHTML =
+                            "<i class='fa fa-ban' aria-hidden='true'></i> 禁用Workflow自动打卡";
+                        document.getElementById("workflowSwitch").onclick =
+                            disableWorkflow;
+                        guideToEditCronJobCore();
+                    }
+                }).catch(function (error) {
+                    networkErr(error, activateWorkflowToEditCronJob);
+                });
+        }
+
+        function guideToEditCronJobCore() {
+            Swal.fire({
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                title: '正在获取工作流文件内容，请稍候...',
+                didOpen: () => {
+                    return function () {
+                        fetch("https://api.github.com/repos/" + userid +
+                                "/LZU-Auto-COVID-Health-Report/contents/.github/workflows/autoreport.yml", {
+                                    headers: headers,
+                                    cache: "no-cache"
+                                }).then(response => {
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.content) {
+                                    originWorkflowSha = data.sha;
+                                    workflowContent = Base64.decode(data.content);
+                                    var regStr = /- cron: '[\s\S]*?'/gi;
+                                    Swal.fire({
+                                        icon: 'info',
+                                        allowOutsideClick: false,
+                                        title: '修改每日打卡时间',
+                                        text: '在下方输入Cron表达式(使用UTC时区)；初始默认为1,2,7,8月每天早7点自动执行(0 23 * 1,2,7,8 *)。当前Cron表达式为: ' +
+                                            workflowContent.match(regStr)[0].replace(
+                                                /- cron: '/g,
+                                                "").replace(/'/g, ""),
+                                        footer: '<a target="_blank" href="#" onclick="window.open(\'https://crontab.guru/\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'校验Cron表达式\');return false;">校验我的Cron表达式</a>',
+                                        input: 'text',
+                                        inputAttributes: {
+                                            autocapitalize: 'off'
+                                        },
+                                        showCancelButton: true,
+                                        confirmButtonText: '确认',
+                                        cancelButtonText: '取消',
+                                        showLoaderOnConfirm: true,
+                                        preConfirm: (cronExp) => {
+                                            return async function () {
+                                                modifiedWorkflowContent = Base64
+                                                    .encode(
+                                                        workflowContent.replace(
+                                                            regStr,
+                                                            "- cron: '" +
+                                                            cronExp + "'"));
+                                                await modifyWorkflow();
+                                            }()
+                                        }
+                                    });
+                                } else {
+                                    authFailed(data.message, "", data.documentation_url);
+                                }
+                            }).catch(function (error) {
+                                networkErr(error, guideToEditCronJob);
+                            });
+                    }();
+                }
+            });
+        }
+
+        function guideToEditDelays() {
+            if (workflowActivated) {
+                guideToEditDelaysCore();
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '尚未启用工作流打卡，确定要启用Workflow自动打卡吗?',
+                    allowOutsideClick: false,
+                    showCancelButton: true,
+                    confirmButtonText: '我确认!',
+                    cancelButtonText: '不要了。',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return activateWorkflowToEditDelays();
+                    }
+                });
+            }
+        }
+
+        async function activateWorkflowToEditDelays() {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/enable', {
+                        method: "PUT",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else if (response.status === 500) {
+                        return {
+                            message: "Not Found"
+                        };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '尚未启用Fork仓库的Actions',
+                                text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                    userid +
+                                    '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                confirmButtonText: `重试`,
+                                showCancelButton: true,
+                                cancelButtonText: "取消",
+                                showLoaderOnConfirm: true,
+                                preConfirm: () => {
+                                    return activateWorkflowToEditDelays();
+                                }
+                            })
+                        }
+                    } else {
+                        workflowActivated = true;
+                        document.getElementById("workflowSwitch").innerHTML =
+                            "<i class='fa fa-ban' aria-hidden='true'></i> 禁用Workflow自动打卡";
+                        document.getElementById("workflowSwitch").onclick =
+                            disableWorkflow;
+                        guideToEditDelaysCore();
+                    }
+                }).catch(function (error) {
+                    networkErr(error, activateWorkflowToEditDelays);
+                });
+        }
+
+        function guideToEditDelaysCore() {
+            Swal.fire({
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                title: '正在获取工作流文件内容，请稍候...',
+                didOpen: () => {
+                    return function () {
+                        fetch("https://api.github.com/repos/" + userid +
+                                "/LZU-Auto-COVID-Health-Report/contents/.github/workflows/autoreport.yml", {
+                                    headers: headers,
+                                    cache: "no-cache"
+                                }).then(response => {
+                                return response.json();
+                            })
+                            .then(data => {
+                                if (data.content) {
+                                    originWorkflowSha = data.sha;
+                                    workflowContent = Base64.decode(data.content);
+                                    var regStr = /"delays": "[\s\S]*?"/gi;
+                                    Swal.fire({
+                                        icon: 'info',
+                                        allowOutsideClick: false,
+                                        title: '修改打卡失败延迟',
+                                        text: '在下方输入打卡失败延迟时间(遵循Linux Sleep命令时间)；初始默认为30分钟(30m)。当前配置延迟时间为: ' +
+                                            workflowContent.match(regStr)[0].replace(
+                                                /"delays": "/g,
+                                                "").replace(/"/g, ""),
+                                        footer: '<a target="_blank" href="#" onclick="window.open(\'https://www.runoob.com/linux/linux-comm-sleep.html\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'了解Linux sleep命令\');return false;">了解Linux sleep命令</a>',
+                                        input: 'text',
+                                        inputAttributes: {
+                                            autocapitalize: 'off'
+                                        },
+                                        showCancelButton: true,
+                                        confirmButtonText: '确认',
+                                        cancelButtonText: '取消',
+                                        showLoaderOnConfirm: true,
+                                        preConfirm: (cronExp) => {
+                                            return async function () {
+                                                modifiedWorkflowContent = Base64
+                                                    .encode(
+                                                        workflowContent.replace(
+                                                            regStr,
+                                                            '"delays": "' +
+                                                            cronExp + '"'));
+                                                await modifyWorkflow();
+                                            }()
+                                        }
+                                    });
+                                } else {
+                                    authFailed(data.message, "", data.documentation_url);
+                                }
+                            }).catch(function (error) {
+                                console.log(error);
+                            });
+                    }();
+                }
+            });
+        }
+
+        async function modifyWorkflow() {
+            // await disableUnrelevantWorkflow();
+            await fetch("https://api.github.com/repos/" + userid +
+                    "/LZU-Auto-COVID-Health-Report/contents/.github/workflows/autoreport.yml", {
+                        method: "PUT",
+                        headers: headers,
+                        body: JSON.stringify({
+                            message: "Update 'autoreport.yml' Workflow",
+                            content: modifiedWorkflowContent,
+                            sha: originWorkflowSha
+                        })
+                    }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.commit) {
+                        window.open(data.commit.html_url, '', 'width=900,height=680,top=80,scrollbars=yes');
+                        notifyNotif('修改提交的Commit详情');
+                        Swal.fire({
+                            icon: 'question',
+                            title: '为防止因为修改的语法错误，或潜在的GitHub不按更新后的时间执行定时任务，是否需要现在手动触发一次工作流?',
+                            text: '注意：如果触发之后长时间不运行很有可能是因为你的修改有语法错误!',
+                            allowOutsideClick: false,
+                            showCancelButton: true,
+                            confirmButtonText: '我确认!',
+                            cancelButtonText: '稍后自己来。',
+                            showLoaderOnConfirm: true,
+                            preConfirm: () => {
+                                return workflowDispatch();
+                            }
+                        });
+                    } else {
+                        authFailed(data.message, "", data.documentation_url);
+                    }
+                }).catch(function (error) {
+                    networkErr(error, buildAllRepoSecrets)
+                });
+        }
+
+        function startBuild() {
+            var cardid = document.getElementById("cardid").value;
+            secretValue[0] = cardid;
+            var password = document.getElementById("password").value;
+            secretValue[1] = password;
+            var pptoken = document.getElementById("pptoken").value;
+            secretValue[2] = pptoken;
+            var pptopic = document.getElementById("pptopic").value;
+            secretValue[3] = pptopic;
+            var serverchansckey = document.getElementById("serverchansckey").value;
+            secretValue[4] = serverchansckey;
+            var corpid = document.getElementById("corpid").value;
+            secretValue[5] = corpid;
+            var corpsecret = document.getElementById("corpsecret").value;
+            secretValue[6] = corpsecret;
+            var agentid = document.getElementById("agentid").value;
+            secretValue[7] = agentid;
+            var tgbottoken = document.getElementById("tgbottoken").value;
+            secretValue[8] = tgbottoken;
+            var tgchatid = document.getElementById("tgchatid").value;
+            secretValue[9] = tgchatid;
+            var gpatoken = "";
+            if (document.getElementById("delaysEnable").checked) {
+                gpatoken = accessToken;
+            }
+            secretValue[10] = gpatoken;
+            if (!cardid) {
+                Swal.fire({
+                    icon: 'info',
+                    title: '表单信息不完整!',
+                    text: "请填写学号(校园卡号)!",
+                });
+                return;
+            } else if (!password) {
+                Swal.fire({
+                    icon: 'info',
+                    title: '表单信息不完整!',
+                    text: "请填写密码(兰州大学邮箱密码)!",
+                });
+                return;
+            } else if (!(corpid && corpsecret && agentid)) {
+                if (!(!corpid && !corpsecret && !agentid)) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: '表单信息不完整!',
+                        text: "请同时填写CORPID、AGENTID和CORPSECRET!",
+                    });
+                    return;
+                } else if ((!tgbottoken || !tgchatid) && (tgbottoken || tgchatid)) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: '表单信息不完整!',
+                        text: "请填写TGBOTTOKEN同时也填写TGCHATID!",
+                    });
+                    return;
+                }
+            } else if ((!tgbottoken || !tgchatid) && (tgbottoken || tgchatid)) {
+                Swal.fire({
+                    icon: 'info',
+                    title: '表单信息不完整!',
+                    text: "请填写TGBOTTOKEN同时也填写TGCHATID!",
+                });
+                return;
+            }
+            Swal.fire({
+                icon: 'question',
+                title: '确定表单信息填写正确吗',
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: '我确认!',
+                cancelButtonText: '再改改!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (hasForked) {
+                        Swal.fire({
+                            icon: 'question',
+                            title: '检测到你已经Fork仓库',
+                            text: '是否需要删除原仓库再重新Fork来获得最新的版本',
+                            showCancelButton: true,
+                            allowOutsideClick: false,
+                            confirmButtonText: '需要!',
+                            cancelButtonText: '不要!'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                Swal.fire({
+                                    icon: 'info',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    title: '删除原仓库中...',
+                                    didOpen: () => {
+                                        return deleteForkToRecreate();
+                                    }
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    allowOutsideClick: false,
+                                    showConfirmButton: false,
+                                    title: '正在为你创建Actions Secrets...创建完成后自动触发一次打卡',
+                                    didOpen: () => {
+                                        return buildAllRepoSecrets();
+                                    }
+                                })
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            title: 'Fork仓库中...',
+                            didOpen: () => {
+                                return forkRepository();
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function checkIfForked(firstTime = true) {
+            fetch('https://api.github.com/repos/' + userid + "/LZU-Auto-COVID-Health-Report", {
+                    headers: headers
+                }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.message) {
+                        hasForked = true;
+                        document.getElementById("repository").style.display = "";
+                        getWorkflowState();
+                        if (swRegistration) {
+                            initializePushButton();
+                        }
+                    } else if (data.message != "Not Found") {
+                        window.setTimeout(checkIfForked, 5000);
+                        return;
+                    }
+                    if (firstTime) {
+                        toast.fire({
+                            icon: 'success',
+                            title: '获取登录授权成功，你可以开始操作了!',
+                        });
+                    }
+                }).catch(function (error) {
+                    console.log(error)
+                    window.setTimeout(checkIfForked, 5000);
+                });
+        }
+
+        function forkRepository() {
+            fetch('https://api.github.com/repos/HollowMan6/LZU-Auto-COVID-Health-Report/forks', {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify({})
+                }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message) {
+                        authFailed(data.message, "", data.documentation_url);
+                    } else {
+                        hasForked = true;
+                        workflowActivated = false;
+                        document.getElementById("workflowSwitch").innerHTML =
+                            "<i class='fa fa-check' aria-hidden='true'> 启用Workflow自动打卡";
+                        document.getElementById("workflowSwitch").onclick = activateWorkflow;
+                        document.getElementById("repository").style.display = "";
+                        if (swRegistration) {
+                            initializePushButton();
+                        }
+                        Swal.fire({
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            title: 'Fork仓库成功!',
+                            text: '正在为你创建Actions Secrets...创建完成后自动触发一次打卡',
+                            didOpen: () => {
+                                return buildAllRepoSecrets();
+                            }
+                        });
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                    window.setTimeout(forkRepository, 10000);
+                });
+        }
+
+        function getWorkflowState() {
+            fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml', {
+                        headers: headers,
+                    }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.message) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        }
+                    } else {
+                        if (data.state) {
+                            if (data.state === "active") {
+                                workflowActivated = true;
+                                document.getElementById("workflowSwitch").innerHTML =
+                                    "<i class='fa fa-ban' aria-hidden='true'></i> 禁用Workflow自动打卡";
+                                document.getElementById("workflowSwitch").onclick = disableWorkflow;
+                            } else {
+                                workflowActivated = false;
+                                document.getElementById("workflowSwitch").innerHTML =
+                                    "<i class='fa fa-check' aria-hidden='true'> 启用Workflow自动打卡";
+                                document.getElementById("workflowSwitch").onclick = activateWorkflow;
+                            }
+                        }
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                    window.setTimeout(getWorkflowState, 5000);
+                });
+        }
+
+        async function activateWorkflowCoreWithWorkflowDispatch() {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/enable', {
+                        method: "PUT",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else if (response.status === 500) {
+                        return {
+                            message: "Not Found"
+                        };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '尚未启用Fork仓库的Actions',
+                                text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                    userid +
+                                    '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                confirmButtonText: `重试`,
+                                showCancelButton: true,
+                                cancelButtonText: "取消",
+                                showLoaderOnConfirm: true,
+                                preConfirm: () => {
+                                    return activateWorkflowCoreWithWorkflowDispatch();
+                                }
+                            })
+                        }
+                    } else {
+                        workflowActivated = true;
+                        document.getElementById("workflowSwitch").innerHTML =
+                            "<i class='fa fa-ban' aria-hidden='true'></i> 禁用Workflow自动打卡";
+                        document.getElementById("workflowSwitch").onclick =
+                            disableWorkflow;
+                        workflowDispatchCore();
+                    }
+                }).catch(function (error) {
+                    networkErr(error, activateWorkflowCoreWithWorkflowDispatch);
+                });
+        }
+
+        function workflowDispatch() {
+            if (!workflowActivated) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '检测到你尚未启用工作流，确定要启用Workflow并且以后自动打卡吗?',
+                    allowOutsideClick: false,
+                    showCancelButton: true,
+                    confirmButtonText: '我确认!',
+                    cancelButtonText: '点错了。',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return activateWorkflowCoreWithWorkflowDispatch();
+                    }
+                });
+            } else {
+                workflowDispatchCore();
+            }
+
+        }
+
+        var checkInterval = null;
+        var tempWindow = null;
+
+        function workflowDispatchCore() {
+            if (checkInterval) {
+                checkCount = 0;
+                window.clearInterval(checkInterval);
+                toast.close()
+            }
+            Swal.fire({
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                title: '正在触发工作流中，请稍候...',
+                didOpen: () => {
+                    return function () {
+                        fetch('https://api.github.com/repos/' + userid +
+                                '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/dispatches', {
+                                    method: "POST",
+                                    headers: headers,
+                                    body: JSON.stringify({
+                                        ref: "main"
+                                    })
+                                }).then(response => {
+                                if (response.status === 204) {
+                                    return null;
+                                } else if (response.status === 500) {
+                                    return {
+                                        message: "Not Found"
+                                    };
+                                } else {
+                                    return response.json();
+                                }
+                            })
+                            .then(data => {
+                                if (data) {
+                                    if (data.message != "Not Found") {
+                                        authFailed(data.message, "", data.documentation_url);
+                                    } else {
+                                        Swal.fire({
+                                            icon: 'error',
+                                            allowOutsideClick: false,
+                                            title: '尚未启用Fork仓库的Actions',
+                                            text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                            footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                                userid +
+                                                '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                            confirmButtonText: `重试`,
+                                            showCancelButton: true,
+                                            cancelButtonText: "取消"
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                workflowDispatchCore();
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    Swal.mixin({
+                                        toast: true,
+                                        position: 'top-end',
+                                        showConfirmButton: false
+                                    }).fire({
+                                        icon: 'success',
+                                        title: '成功触发一次工作流, 请根据运行结果判断是否创建成功，努力获取工作流运行记录中, 成功后自动为你跳转...',
+                                        didOpen: () => {
+                                            return function () {
+                                                tempWindow = window.open(
+                                                    "https://github.com/" +
+                                                    userid +
+                                                    "/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22",
+                                                    '',
+                                                    'width=900,height=680,top=80,scrollbars=yes'
+                                                );
+                                                createNotify("已打开页面", {
+                                                    body: "已经为你打开工作流运行页面，请稍等，正在获取触发的打卡，会为你自动跳转。点击本通知返回!"
+                                                });
+                                                checkInterval = window
+                                                    .setInterval(
+                                                        checkWorkflowLink,
+                                                        1000);
+                                            }();
+                                        }
+                                    });
+                                }
+                            }).catch(function (error) {
+                                networkErr(error, workflowDispatchCore);
+                            });
+
+                    }();
+                }
+            });
+        }
+
+        var checkCount = 0;
+
+        function openSpecifiedRun(url) {
+            return fetch(url, {
+                    headers: headers,
+                    cache: "no-cache"
+                }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.jobs) {
+                        tempWindow.location = data.jobs[0].html_url + "?check_suite_focus=true";
+                        Swal.close();
+                    } else {
+                        window.setTimeout(function () {
+                            openSpecifiedRun(url);
+                        }, 1000);
+                    }
+                }).catch(function (error) {
+                    window.setTimeout(function () {
+                        openSpecifiedRun(url);
+                    }, 1000);
+                });
+        }
+
+        var tempParam = "queued";
+
+        function checkWorkflowLink() {
+            return fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/runs?status=' + tempParam, {
+                        headers: headers,
+                        cache: "no-cache"
+                    }).then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.total_count > 0) {
+                        for (var i = 0; i < data.total_count; i++) {
+                            if (data.workflow_runs[i].name === "GitHub Actions LZU Auto COVID Health Report") {
+                                checkCount = 0;
+                                window.clearInterval(checkInterval);
+                                window.setTimeout(function () {
+                                    openSpecifiedRun(data.workflow_runs[i].jobs_url);
+                                }, 1000);
+                                break;
+                            }
+                        }
+                    }
+                    if (checkCount > 40) {
+                        window.clearInterval(checkInterval);
+                        toast.fire({
+                            icon: 'error',
+                            title: '获取工作流运行记录失败!'
+                        }).then((result) => {
+                            checkCount = 0;
+                        });
+                    }
+                    checkCount += 1;
+                    if (tempParam === "queued") {
+                        tempParam = "in_progress";
+                    } else {
+                        tempParam = "queued";
+                    }
+                }).catch(function (error) {
+                    console.log(error);
+                });
+        }
+
+        function disableWorkflow() {
+            Swal.fire({
+                icon: 'warning',
+                title: '确定要禁用Workflow自动打卡吗?',
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: '我确认!',
+                cancelButtonText: '点错了。',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return disableWorkflowCore();
+                }
+            });
+        }
+
+        async function disableWorkflowCore() {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/disable', {
+                        method: "PUT",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else if (response.status === 500) {
+                        return {
+                            message: "Not Found"
+                        };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '尚未启用Fork仓库的Actions',
+                                text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                    userid +
+                                    '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                confirmButtonText: `重试`,
+                                showCancelButton: true,
+                                cancelButtonText: "取消",
+                                showLoaderOnConfirm: true,
+                                preConfirm: () => {
+                                    return disableWorkflowCore();
+                                }
+                            })
+                        }
+                    } else {
+                        toast.fire({
+                            icon: 'success',
+                            title: '成功禁用Workflow自动打卡!',
+                            didOpen: () => {
+                                return function () {
+                                    workflowActivated = false;
+                                    document.getElementById("workflowSwitch").innerHTML =
+                                        "<i class='fa fa-check' aria-hidden='true'> 启用Workflow自动打卡";
+                                    document.getElementById("workflowSwitch").onclick =
+                                        activateWorkflow;
+                                }();
+                            }
+                        });
+                    }
+                }).catch(function (error) {
+                    networkErr(error, disableWorkflowCore);
+                });
+        }
+
+        function activateWorkflow() {
+            Swal.fire({
+                icon: 'warning',
+                title: '确定要启用Workflow自动打卡吗?',
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: '我确认!',
+                cancelButtonText: '点错了。',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return activateWorkflowCore();
+                }
+            });
+        }
+
+        async function activateWorkflowCore() {
+            await fetch('https://api.github.com/repos/' + userid +
+                    '/LZU-Auto-COVID-Health-Report/actions/workflows/autoreport.yml/enable', {
+                        method: "PUT",
+                        headers: headers,
+                    }).then(response => {
+                    if (response.status === 204) {
+                        return null;
+                    } else if (response.status === 500) {
+                        return {
+                            message: "Not Found"
+                        };
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        if (data.message != "Not Found") {
+                            authFailed(data.message, "", data.documentation_url);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                allowOutsideClick: false,
+                                title: '尚未启用Fork仓库的Actions',
+                                text: '请点击下面链接, 然后在弹出的网页中下部点击绿色按钮"I understand my workflows, go ahead and enable them"，完成后点击下面"重试"',
+                                footer: '<a target="_blank" href="#" onclick="window.open(\'https://github.com/' +
+                                    userid +
+                                    '/LZU-Auto-COVID-Health-Report/actions?query=workflow%3A%22GitHub+Actions+LZU+Auto+COVID+Health+Report%22\', \'\', \'width=900,height=680,top=80,scrollbars=yes\');notifyNotif(\'启用Fork仓库的工作流\');return false;">点我启用Fork仓库的工作流</a>',
+                                confirmButtonText: `重试`,
+                                showCancelButton: true,
+                                cancelButtonText: "取消",
+                                showLoaderOnConfirm: true,
+                                preConfirm: () => {
+                                    return activateWorkflowCore();
+                                }
+                            })
+                        }
+                    } else {
+                        toast.fire({
+                            icon: 'success',
+                            title: '成功启用Workflow自动打卡!',
+                            didOpen: () => {
+                                return function () {
+                                    workflowActivated = true;
+                                    document.getElementById("workflowSwitch").innerHTML =
+                                        "<i class='fa fa-ban' aria-hidden='true'></i> 禁用Workflow自动打卡";
+                                    document.getElementById("workflowSwitch").onclick =
+                                        disableWorkflow;
+                                }();
+                            }
+                        });
+                    }
+                }).catch(function (error) {
+                    networkErr(error, activateWorkflowCore);
+                });
+        }
+
+        function deleteFork() {
+            Swal.fire({
+                icon: 'warning',
+                title: '确定要删除你的Fork仓库吗?',
+                text: '所有的Actions Secrets和你所做的改动将丢失!',
+                allowOutsideClick: false,
+                showCancelButton: true,
+                confirmButtonText: '我确认!',
+                cancelButtonText: '点错了。',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return async function () {
+                        await fetch('https://api.github.com/repos/' + userid +
+                                '/LZU-Auto-COVID-Health-Report', {
+                                    method: "DELETE",
+                                    headers: headers,
+                                }).then(response => {
+                                if (response.status === 204) {
+                                    return null;
+                                } else {
+                                    return response.json();
+                                }
+                            })
+                            .then(data => {
+                                if (data) {
+                                    if (data.message) {
+                                        authFailed(data.message, "", data.documentation_url);
+                                    }
+                                } else {
+                                    toast.fire({
+                                        icon: 'success',
+                                        title: '成功删除Fork仓库!',
+                                        didOpen: () => {
+                                            return function () {
+                                                workflowActivated = false;
+                                                hasForked = false;
+                                                document.getElementById(
+                                                        "repository").style
+                                                    .display = "none";
+                                            }();
+                                        }
+                                    });
+                                }
+                            }).catch(function (error) {
+                                networkErr(error, deleteFork);
+                            });
+                    }();
+                }
+            })
+        }
+    </script>
+    <footer>
+        <hr />
+        <p align="center">
+            <img class="headpic" src="/img/logo.gif" width="30%" onclick="window.open('/','_blank')">
+        </p>
+        <h5 align="center">Copyright &copy; 2018-2021 <img width="20px" class="footerLogo" style="margin-top: -5px"
+                src="/favicon.ico"> Hollow
+            Man (<a href="https://github.com/HollowMan6" target="_blank"
+                onclick="notifyNotif('作者GitHub');">@HollowMan6</a>). All rights reserved.</h5>
+        <p align="center">
+            <img src="https://img.shields.io/badge/license-GPL-green"
+                onclick="window.open('https://opensource.org/licenses/GPL-3.0/','_blank')">
+            <img src="https://img.shields.io/badge/-%E2%9D%A4%20Open%20Source%20%E6%8D%90%E5%8A%A9%E6%88%91-Green?style=flat-square&logo=GitHub&logoColor=white&link=https://hollowman.ml/fund.html"
+                onclick="window.open('/fund.html','_blank')">
+            <img src="https://img.shields.io/github/repo-size/HollowMan6/LZU-Auto-COVID-Health-Report.svg"
+                onclick="window.open('https://github.com/HollowMan6/LZU-Auto-COVID-Health-Report','_blank')">
+        </p>
+        <h6 align="center">
+            <a style="font-size: 15px;" href="https://icp.gov.moe" onclick="notifyNotif('备案');"
+                target="_blank">萌ICP备</a>
+            <img width="20px" style="margin-top: -5px;" src="https://icp.gov.moe/images/ico64.png">
+            <a style="font-size: 15px;" href="https://icp.gov.moe/?keyword=20218666" onclick="notifyNotif('备案信息');"
+                target="_blank">20218666号</a>
+        </h6>
+    </footer>
+</body>
+
+</html>

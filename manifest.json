@@ -1,0 +1,26 @@
+{
+    "short_name": "LZU COVID",
+    "name": "LZU Auto COVID Health Report",
+    "icons": [
+      {
+        "src": "./lzu.png",
+        "sizes": "340x340",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ],
+    "start_url": "/LZU-Auto-COVID-Health-Report/",
+    "display": "standalone",
+    "background_color": "#eee",
+    "theme_color": "#eee",
+    "description": "This is the LZU Auto COVID Health Report Using GitHub Actions forked repository creation and management APP.",
+    "lang": "en",
+    "categories": ["lzu", "covid", "actions", "github"],
+    "screenshots": [
+      {
+        "src": "https://marketplace-screenshots.githubusercontent.com/9157/0011cc00-76fa-11eb-9562-605f5d49bfbb?auto=webp&format=jpeg&width=670&dpr=1.5",
+        "type": "image/jpeg",
+        "sizes": "1005x740"
+      }
+    ]
+  }
